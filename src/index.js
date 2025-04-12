@@ -1,10 +1,9 @@
-
 require('dotenv').config();
 const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 client.commands = new Collection();
 
 const folders = path.join(__dirname, 'commands');
@@ -46,5 +45,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			: await interaction.reply(reply);
 	}
 });
+
+client.on(Events.MessageCreate, (message) => {
+	if (message.author.bot) return;
+		message.reply('<@593353942986129428> is a automatonic bot, not a human. Please do not ping it.'); // tyler
+	}
+);
 
 client.login(process.env.TOKEN);

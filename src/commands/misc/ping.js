@@ -4,12 +4,13 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Replies with Pong!'),
-  
+
   async execute(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
     let description;
-
-    if (ping < 100) {
+    if (ping === -1) {
+      description = "Ping: Unavailable - The bot is still establishing a connection to Discord. Try again in a few seconds.";
+    } else if (ping < 100) {
       description = `Ping: ${ping}ms - That's faster than the time it takes for a hummingbird to flap its wings once!`;
     } else if (ping < 200) {
       description = `Ping: ${ping}ms - That's about the time it takes for a human to blink!`;
@@ -19,7 +20,7 @@ module.exports = {
       description = `Ping: ${ping}ms - That's slower than the time it takes for a sneeze to travel out of your mouth!`;
     } else {
       description = `Ping: ${ping}ms - Bad connection, slower than the time it takes for a sloth to move a few inches.`;
-    } // i got skibidi with this (thanks chatgpt for the inspo)
+    }
 
     const embed = new EmbedBuilder()
       .setTitle('🏓 Pong!')
