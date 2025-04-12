@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "discord.js": "^14.18.0",
+    "git": "^0.1.5",
+    "mongoose": "^8.13.2",
+    "nodemon": "^3.1.9"
+  },
+  "name": "kog-bot",
+  "version": "1.0.0",
+  "description": "KOG Bot for Kleiner Oil Group",
+  "main": "src/index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sheepboi546KOG/KOG-Bot.git"
+  },
+  "author": "Sheepboi546",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Sheepboi546KOG/KOG-Bot/issues"
+  },
+  "homepage": "https://github.com/Sheepboi546KOG/KOG-Bot#readme"
+}
