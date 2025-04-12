@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "discord.js": "^14.18.0",
+    "dotenv": "^16.5.0",
     "git": "^0.1.5",
     "mongoose": "^8.13.2",
     "nodemon": "^3.1.9"
@@ -9,9 +10,9 @@
   "version": "1.0.0",
   "description": "KOG Bot for Kleiner Oil Group",
   "main": "src/index.js",
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/index.js",
+    "test": "echo \"No tests specified yet\" && exit 0" 
   },
   "repository": {
     "type": "git",
