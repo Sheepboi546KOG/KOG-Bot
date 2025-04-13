@@ -12,6 +12,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "dev": "node src/index.js --dev",
     "test": "echo \"No tests specified yet\" && exit 0" 
   },
   "repository": {

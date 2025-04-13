@@ -1,7 +1,10 @@
 require('dotenv').config();
-const { Client, Events, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, Events, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const config = require('../config.json');
+
+const isDevMode = process.argv.includes('--dev');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 client.commands = new Collection();
@@ -21,16 +24,57 @@ for (const folder of commandFolders) {
 	}
 }
 
-client.once('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
+client.once(Events.ClientReady, () => {
+	if (!isDevMode) {
+		console.log(`Logged in as ${client.user.tag}!`);
+	} else {
+		console.log(`Logged in as ${client.user.tag} in Development Mode!`);
+	}
+
+	if (isDevMode) {
+		client.user.setPresence({
+			activities: [{ name: 'in Development Mode', type: ActivityType.Playing }],
+			status: 'dnd' 
+		});
+	} else {
+		client.user.setPresence({
+			activities: [{ name: 'with your database', type: ActivityType.Playing }],
+			status: 'online',   
+		});
+	}
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 
+	if (isDevMode && !config.developers.includes(interaction.user.id)) {
+		const reply = {
+			embeds: [{
+				title: "Bot in Development Mode",
+				description: 'The bot is currently in development mode and only developers can run commands.',
+				color: 0xed4245,
+			}],
+			ephemeral: true,
+		};
+		return interaction.reply(reply);
+	}
+
+	const devUsers = config.developers || [];
+
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 
+	if (command.dev && !devUsers.includes(interaction.user.id)) {
+		const reply = {
+			embeds: [{
+				title: "Command in Dev Mode",
+				description: 'This command is not available to you and is under development.',
+				color: 0xed4245,
+			}],
+			ephemeral: true,
+		};
+		return interaction.reply(reply);
+	}
 	try {
 		await command.execute(interaction);
 	}
@@ -45,11 +89,5 @@ client.on(Events.InteractionCreate, async (interaction) => {
 			: await interaction.reply(reply);
 	}
 });
-
-client.on(Events.MessageCreate, (message) => {
-	if (message.author.bot) return;
-		message.reply('<@593353942986129428> is a automatonic bot, not a human. Please do not ping it.'); // tyler
-	}
-);
 
 client.login(process.env.TOKEN);
