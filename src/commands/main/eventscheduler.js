@@ -60,18 +60,19 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
         const eventId = interaction.options.getString('id');
         const mrId = '1193414880498286703';
+        const hrId = '917829003660910633'
         const memberRoles = interaction.member.roles.cache;
 
-        if (!memberRoles.has(mrId)) {
+        if (!memberRoles.has(mrId) || !memberRoles.has(hrId)) {
             return interaction.reply({
                 embeds: [{
-                    title: "Bot in Development Mode",
-                    description: 'The bot is currently in development mode and only developers can run commands.',
+                    title: "No Permission",
+                    description: 'You cannot run this command as you do not have permission.',
                     color: 0xed4245,
                 }],
                 ephemeral: true,
             });
-        }
+        } // FIX THIS TOMMOROW
 
         if (subcommand === 'schedule') {
             const modal = new ModalBuilder()
