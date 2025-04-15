@@ -10,6 +10,10 @@ const eventSchema = new Schema({
         type: String,
         required: true,
     },
+    messageLink: {
+        type: String,
+        required: false,
+    },
 }, {
     timestamps: true,
 });
