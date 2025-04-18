@@ -2,4 +2,3 @@
 node_modules
 .github
 examples
-src/commands/moderation/warn.js
