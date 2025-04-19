@@ -31,16 +31,58 @@ module.exports = {
     try {
       const hrRole = "917829003660910633";
       const member = interaction.guild.members.cache.get(interaction.user.id);
-
+      
+    // add permissions stuff for warn.js ban.js and unban.js     
 
       const subcommand = interaction.options.getSubcommand();
       const IAWEBHOOK = process.env.IAWEBHOOK;
 
+
+     
+      
       if (subcommand === "give") {
         const warnedUser = interaction.options.getUser("user");
         const reason = interaction.options.getString("reason");
         const image = interaction.options.getAttachment("image");
         const warningId = uuidv4();
+
+        if (!member.roles.cache.has(hrRole)) {
+          const noPermissionEmbed = new EmbedBuilder()
+            .setColor("#e44144")
+            .setTitle("Permission Denied")
+            .setDescription("You do not have permission to use this command.")
+            .setTimestamp();
+          return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
+        }
+  
+        
+  
+          if (interaction.user.id === targetUser?.id) {
+            const selfActionEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on yourself.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [selfActionEmbed], ephemeral: true });
+          }
+  
+          if (targetMember?.bot) {
+            const botActionEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on a bot.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [botActionEmbed], ephemeral: true });
+          }
+  
+          if (targetMember && targetMember.roles.highest.position >= member.roles.highest.position) {
+            const roleHierarchyEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on a user with a higher or equal role.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [roleHierarchyEmbed], ephemeral: true });
+          }
 
         const newWarning = new Warning({
           warningId,
@@ -93,6 +135,44 @@ module.exports = {
         const removalReason = interaction.options.getString("reason");
 
         const warning = await Warning.findOne({ warningId });
+
+        if (!member.roles.cache.has(hrRole)) {
+          const noPermissionEmbed = new EmbedBuilder()
+            .setColor("#e44144")
+            .setTitle("Permission Denied")
+            .setDescription("You do not have permission to use this command.")
+            .setTimestamp();
+          return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
+        }
+  
+        
+  
+          if (interaction.user.id === targetUser?.id) {
+            const selfActionEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on yourself.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [selfActionEmbed], ephemeral: true });
+          }
+  
+          if (targetMember?.bot) {
+            const botActionEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on a bot.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [botActionEmbed], ephemeral: true });
+          }
+  
+          if (targetMember && targetMember.roles.highest.position >= member.roles.highest.position) {
+            const roleHierarchyEmbed = new EmbedBuilder()
+              .setColor("#e44144")
+              .setTitle("Action Denied")
+              .setDescription("You cannot perform this action on a user with a higher or equal role.")
+              .setTimestamp();
+            return interaction.reply({ embeds: [roleHierarchyEmbed], ephemeral: true });
+          }
 
         if (!warning) {
           const embed = new EmbedBuilder()

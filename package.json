@@ -13,9 +13,8 @@
   "description": "KOG Bot for Kleiner Oil Group",
   "main": "src/index.js",
   "scripts": {
-    "refresh": "node src/deploy/registercommands.js",
-    "start": "node src/index.js",
-    "dev": "node src/index.js --dev",
+    "start": "node src/deploy/registercommands.js && node src/index.js",
+    "dev": "node src/deploy/registercommands.js && node src/index.js --dev",
     "test": "echo \"No tests specified yet\" && exit 0"
   },
   "repository": {

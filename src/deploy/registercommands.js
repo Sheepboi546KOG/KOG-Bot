@@ -3,6 +3,8 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 
+
+
 const commands = [];
 const foldersPath = path.join(__dirname, '..', 'commands');
 let commandFolders = [];
@@ -34,12 +36,18 @@ const rest = new REST().setToken(process.env.TOKEN);
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env.client_id, process.env.guild_id),
-			{ body: commands },
-		);
+		// Array of guild IDs
+		const guildIds = ['1078478406745866271', '857445688932696104'];
+		const clientId = process.env.CLIENT_ID; // Your bot's client ID
 
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		for (const guildId of guildIds) {
+			const data = await rest.put(
+				Routes.applicationGuildCommands(clientId, guildId.trim()),
+				{ body: commands },
+			);
+			const guildName = guildId === '1078478406745866271' ? 'KIAD' : 'KOG'; // I Know I like it saying the guild name 
+			console.log(`Successfully reloaded ${data.length} application (/) commands for guild ${guildName}.`);
+		}
 	}
 	catch (error) {
 		console.error(error);
