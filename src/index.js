@@ -28,23 +28,32 @@ for (const folder of commandFolders) {
 }
 
 client.once(Events.ClientReady, () => {
-	if (!isDevMode) {
-		console.log(`Logged in as ${client.user.tag}!`);
-	} else {
-		console.log(`Logged in as ${client.user.tag} in Development Mode!`);
-	}
+    if (!isDevMode) {
+        console.log(`Logged in as ${client.user.tag}!`);
+    } else {
+        console.log(`Logged in as ${client.user.tag} in Development Mode!`);
+    }
 
-	if (isDevMode) {
-		client.user.setPresence({
-			activities: [{ name: 'in Development Mode', type: ActivityType.Playing }],
-			status: 'dnd' 
-		});
-	} else {
-		client.user.setPresence({
-			activities: [{ name: 'with your database', type: ActivityType.Playing }],
-			status: 'online',   
-		});
-	}
+    const presences = isDevMode
+        ? [
+            { activities: [{ name: 'in Development Mode', type: ActivityType.Playing }], status: 'dnd' },
+            
+        ]
+        : [
+            { activities: [{ name: 'with KOG logging!', type: ActivityType.Playing }], status: 'online' },
+            { activities: [{ name: 'TylersTears Crying', type: ActivityType.Listening }], status: 'online' },
+            { activities: [{ name: '🐈‍⬛', type: ActivityType.Playing }], status: 'online' },
+            { activities: [{ name: 'QS and T3 spamming', type: ActivityType.Playing }], status: 'online' },
+            { activities: [{ name: 'to Metallica', type: ActivityType.Listening }], status: 'online' },
+            { activities: [{ name: 'You, I am watching you.', type: ActivityType.Watching }], status: 'online' },
+            { activities: [{ name: 'with KIADs Appeals', type: ActivityType.Playing }], status: 'online' },
+        ];
+
+    let index = 0;
+    setInterval(() => {
+        client.user.setPresence(presences[index]);
+        index = (index + 1) % presences.length;
+    }, 5000); 
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
