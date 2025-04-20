@@ -44,7 +44,7 @@ client.once(Events.ClientReady, () => {
             { activities: [{ name: 'TylersTears Crying', type: ActivityType.Listening }], status: 'online' },
             { activities: [{ name: '🐈‍⬛', type: ActivityType.Playing }], status: 'online' },
             { activities: [{ name: 'QS and T3 spamming', type: ActivityType.Playing }], status: 'online' },
-            { activities: [{ name: 'to Metallica', type: ActivityType.Listening }], status: 'online' },
+            { activities: [{ name: 'Call of the Ktulu - Metallica', type: ActivityType.Listening }], status: 'online' },
             { activities: [{ name: 'You, I am watching you.', type: ActivityType.Watching }], status: 'online' },
             { activities: [{ name: 'with KIADs Appeals', type: ActivityType.Playing }], status: 'online' },
         ];

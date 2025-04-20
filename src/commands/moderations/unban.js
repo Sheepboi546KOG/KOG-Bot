@@ -6,110 +6,107 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("unban")
     .setDescription("Unban a user.")
-    .addUserOption(option =>
-      option.setName("user").setDescription("User to unban").setRequired(true)
+    .addStringOption(option =>
+      option.setName("user_id").setDescription("ID of the user to unban").setRequired(true)
     )
     .addStringOption(option =>
-      option.setName("reason").setDescription("Reason for the ban").setRequired(true)
+      option.setName("reason").setDescription("Reason for the unban").setRequired(true)
+    )
+    .addStringOption(option =>
+      option
+        .setName("unban_scope")
+        .setDescription("Scope of the unban")
+        .setRequired(true)
+        .addChoices(
+          { name: "KIAD", value: "Kleiner Internal Affairs Department" },
+          { name: "KOG", value: "Kleiner Oil Group" },
+          { name: "Squadrons", value: "[KOG] Squadrons" },
+          { name: "ALL", value: "ALL" }
+        )
     ),
 
   async execute(interaction) {
     try {
-      const hrRole = "917829003660910633";
-      const unbanningMember = interaction.options.getUser("user");
-      const reason = interaction.options.getString("reason");
-      const memberToBan = await interaction.guild.members.fetch(unbanningMember.id);
-    const member = interaction.guild.members.cache.get(interaction.user.id);
+      const ALLOWED_ROLE_IDS = [
+        "917829003660910633",      // KOG HR
+        "1360275881343324404",     // Internal Affairs Squadrons
+        "1313994079662641233"      // KOG Command Squadrons
+      ];
 
-    if (!member.roles.cache.has(hrRole)) {
-        const noPermissionEmbed = new EmbedBuilder()
+      const member = interaction.member;
+      const hasPermission = member.roles.cache.some(role => ALLOWED_ROLE_IDS.includes(role.id));
+
+      if (!hasPermission) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Permission Denied")
             .setDescription("You do not have permission to use this command.")
-            .setTimestamp();
-        return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
-    }
+            .setTimestamp()],
+          ephemeral: true
+        });
+      }
 
-    if (unbanningMember.id === interaction.user.id) {
-        const selfUnbanEmbed = new EmbedBuilder()
+      const userId = interaction.options.getString("user_id");
+      const reason = interaction.options.getString("reason");
+      const unbanScope = interaction.options.getString("unban_scope");
+
+      // Attempt to unban the user
+      try {
+        await interaction.guild.members.unban(userId, reason);
+      } catch (error) {
+        console.error("Error unbanning user:", error);
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
             .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot unban yourself.")
-            .setTimestamp();
-        return interaction.reply({ embeds: [selfUnbanEmbed], ephemeral: true });
-    }
+            .setTitle("Unban Failed")
+            .setDescription("Unable to unban the specified user. They may not be banned or I lack permissions.")
+            .setTimestamp()],
+          ephemeral: true
+        });
+      }
 
-    if (unbanningMember.bot) {
-        const botUnbanEmbed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot unban a bot.")
-            .setTimestamp();
-        return interaction.reply({ embeds: [botUnbanEmbed], ephemeral: true });
-    }
+      // Notify the user via DM
+      const unbannedUser = await interaction.client.users.fetch(userId).catch(() => null);
+      if (unbannedUser) {
+        const dmEmbed = new EmbedBuilder()
+          .setColor("#2da4cc")
+          .setTitle("You Have Been Unbanned")
+          .setDescription(
+            unbanScope === "ALL"
+              ? "You have been unbanned from Kleiner Oil Group and all of its respective servers. You can rejoin here: [KOG](https://discord.gg/HvtsjFvh)"
+              : `You have been unbanned from the following scope: ${unbanScope}.`
+          )
+          .addFields({ name: "Reason", value: reason })
+          .setTimestamp();
 
-    if (memberToBan.roles.highest.position >= member.roles.highest.position) {
-        const roleHierarchyEmbed = new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot unban a user with a higher or equal role.")
-            .setTimestamp();
-        return interaction.reply({ embeds: [roleHierarchyEmbed], ephemeral: true });
-    }
-try {
-    await interaction.guild.members.unban(unbanningMember.id, reason)
-} catch (error) {
-    console.error("Error unbanning user:", error);
-    const errorEmbed = new EmbedBuilder()
-      .setColor("#e44144")
-      .setTitle("Error")
-      .setDescription("An error occurred while unbanning the user. Are you sure they are banned?")
-      .setTimestamp();
-    return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
-  
-}
-  
+        await unbannedUser.send({ embeds: [dmEmbed] }).catch(() => {
+          console.warn(`Could not DM user with ID ${userId}`);
+        });
+      }
 
-    const dmEmbed = new EmbedBuilder()
-      .setColor(Colors.Blue)
-      .setTitle("Unban Notification")
-      .setDescription(`You have been Unbanned from Kleiner Oil Group.\nYou can rejoin here: [KOG](https://discord.gg/HvtsjFvh)`)
-      .setTimestamp();
-
-   
-
-    const targetUserId = "1138235120424325160";
-    const targetUser = await interaction.client.users.fetch(targetUserId);
-
-    await targetUser.send({ embeds: [dmEmbed] }).catch(() => {
-      console.error(`Failed to send DM to user with ID ${targetUserId}`);
-    });
-
-    console.log(`DM sent to user with ID ${targetUserId}`);
- 
-
-      // Log embed
+      // Log the unban action
       const logEmbed = new EmbedBuilder()
-        .setColor(Colors.Blue)
+        .setColor("#2da4cc")
         .setTitle("🚨 | Member Unbanned | 🚨")
         .setDescription(
-          `A member has been unbanned in KOG.\n\n**User:** <@${unbanningMember.id}>\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>`
+          `A member has been unbanned in the following scope: **${unbanScope}**\n\n**User ID:** ${userId}\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>`
         )
         .setTimestamp();
 
-
-
       const IAWEBHOOK = process.env.IAWEBHOOK;
       if (IAWEBHOOK) {
-        axios.post(IAWEBHOOK, {
+        await axios.post(IAWEBHOOK, {
           embeds: [logEmbed.toJSON()]
-        }).catch(err => console.error("Webhook error:", err));
+        }).catch(console.error);
       }
 
+      // Reply to the moderator
       const successEmbed = new EmbedBuilder()
         .setColor("#2da4cc")
-        .setTitle("Unban Successful")
-        .setDescription(`Successfully unbanned <@${unbanningMember.id}>.`)
+        .setTitle("Unban Executed")
+        .setDescription(`Successfully unbanned the user with ID ${userId} from the scope: **${unbanScope}** and logged the action.`)
+        .addFields({ name: "Reason", value: reason })
         .setTimestamp();
 
       return interaction.reply({ embeds: [successEmbed], ephemeral: true });
@@ -119,7 +116,7 @@ try {
       const errorEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("Error")
-        .setDescription("An error occurred while executing the command.")
+        .setDescription("An unexpected error occurred while executing the command.")
         .setTimestamp();
       return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
     }
