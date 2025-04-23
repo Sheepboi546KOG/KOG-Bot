@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { v4: uuidv4 } = require("uuid");
 const Warning = require("../../schemas/warn.js");
 const axios = require('axios');
+const modSchema = require("../../schemas/mods.js"); 
 require('dotenv').config();
 
 module.exports = {
@@ -29,10 +30,40 @@ module.exports = {
   
   async execute(interaction) {
     try {
-      const hrRole = "917829003660910633";
+     
       const member = interaction.guild.members.cache.get(interaction.user.id);
       
-    // add permissions stuff for warn.js ban.js and unban.js     
+    const haspermission = await modSchema.findOne({ userId: interaction.user.id });
+
+    if (!haspermission) {
+      const noPermissionEmbed = new EmbedBuilder()
+        .setColor("#e44144")
+        .setTitle("Permission Denied")
+        .setDescription("You do not have permission to use this command.")
+        .setTimestamp();
+      return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
+    }
+
+  const targetUser = interaction.options.getUser("user");
+  const targetMember = interaction.guild.members.cache.get(targetUser?.id);
+
+  if (interaction.user.id === targetUser?.id) {
+    const selfActionEmbed = new EmbedBuilder()
+      .setColor("#e44144")
+      .setTitle("Action Denied")
+      .setDescription("You cannot perform this action on yourself.")
+      .setTimestamp();
+    return interaction.reply({ embeds: [selfActionEmbed], ephemeral: true });
+  }
+
+  if (targetMember && targetMember.roles.highest.position >= member.roles.highest.position) {
+    const roleHierarchyEmbed = new EmbedBuilder()
+      .setColor("#e44144")
+      .setTitle("Action Denied")
+      .setDescription("You cannot perform this action on a user with a higher or equal role.")
+      .setTimestamp();
+    return interaction.reply({ embeds: [roleHierarchyEmbed], ephemeral: true });
+  }
 
       const subcommand = interaction.options.getSubcommand();
       const IAWEBHOOK = process.env.IAWEBHOOK;

@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
+const modSchema = require("../../schemas/mods"); 
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,14 +28,9 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const ALLOWED_ROLE_IDS = [
-        "917829003660910633",      // KOG HR
-        "1360275881343324404",     // Internal Affairs Squadrons
-        "1313994079662641233"      // KOG Command Squadrons
-      ];
-
+      
       const member = interaction.member;
-      const hasPermission = member.roles.cache.some(role => ALLOWED_ROLE_IDS.includes(role.id));
+      const hasPermission = await modSchema.findOne({ userId: interaction.user.id });
 
       if (!hasPermission) {
         return interaction.reply({
@@ -60,7 +56,7 @@ module.exports = {
           embeds: [new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unban Failed")
-            .setDescription("Unable to unban the specified user. They may not be banned or I lack permissions.")
+            .setDescription("Unable to unban the specified user. They may not be banned.")
             .setTimestamp()],
           ephemeral: true
         });

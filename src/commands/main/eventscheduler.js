@@ -9,7 +9,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('schedule')
-                .setDescription('Schedule a new event (restricted to specific role)')
+                .setDescription('Schedule a new event, KOG only.')
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -79,7 +79,19 @@ module.exports = {
         const mrId = '1193414880498286703';
         const hrId = '917829003660910633';
         const memberRoles = interaction.member.roles.cache;
-        const eventChannel = interaction.client.channels.cache.get('1346226339010838528');
+        const eventChannel = interaction.client.channels.cache.get('1142584396092821594');
+        const restrictedGuildIds = ['1313768451768188948', '1078478406745866271'];
+
+        if (interaction.guildId === restrictedGuildIds){
+            return interaction.reply({
+                embeds: [{
+                    title: "No Permission",
+                    description: 'You cannot run this command in this server. Please use in the main server.',
+                    color: 0xed4245,
+                }],
+                ephemeral: true,
+            });
+        }
 
         if (!memberRoles.has(mrId) && !memberRoles.has(hrId)) {
             return interaction.reply({
@@ -146,6 +158,7 @@ module.exports = {
 
             if (!event) {
                 return interaction.reply({
+                    
                     embeds: [{
                         title: "Event Not Found",
                         description: `No event found with the ID: ${eventId}`,
@@ -281,6 +294,7 @@ module.exports = {
                             (notes ? `\n\n**Notes:** ${notes}` : '') +
                             (link ? `\n\n[Join the event](${link})` : ''),
                         color: 0x57f287,
+                        content: `<@&857447103097602058>, <@&896891649064575016>`,
                     }],
                 });
             }

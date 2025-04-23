@@ -15,7 +15,7 @@ module.exports = {
         const uuid = uuidv4();
 
         try {
-            const channel = interaction.client.channels.cache.get('1346226339010838528');
+            const channel = interaction.client.channels.cache.get('1142584396092821594');
             if (!channel) {
                 return interaction.reply({
                     content: '❌ Announcement channel not found.',
@@ -29,7 +29,7 @@ module.exports = {
                 .setDescription(`A new event has been scheduled by **<@${interaction.user.id}>**!\n\nHost: ${Host}\nDate: <t:${unix}:F>\nGame: ${game}\nType: ${Type}\n\nNotes: ${note}\n\nPlease confirm your reaction with the ✅ below.`)
                 .setTimestamp();
 
-            const message = await channel.send({ embeds: [embed] });
+            const message = await channel.send({ embeds: [embed], content: `<@&857447103097602058>, <@&896891649064575016>`});
             await message.react('✅');
 
             const event = await Event.create({

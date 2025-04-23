@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
+const modSchema = require("../../schemas/mods"); 
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -47,16 +48,9 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const ALLOWED_ROLE_IDS = [
-        "917829003660910633",      // KOG HR
-        "1360275881343324404",     // Internal Affairs Squadrons
-        "1313994079662641233"      // KOG Command Squadrons
-
-        // tyler needs to approve this though
-      ];
-
+      
       const member = interaction.member;
-      const hasPermission = member.roles.cache.some(role => ALLOWED_ROLE_IDS.includes(role.id));
+      const hasPermission = await modSchema.findOne({ userId: interaction.user.id });
 
       if (!hasPermission) {
         return interaction.reply({
@@ -69,6 +63,27 @@ module.exports = {
         });
       }
 
+      if (interaction.user.id === banningUser.id) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor("#e44144")
+            .setTitle("Action Denied")
+            .setDescription("You cannot ban yourself.")
+            .setTimestamp()],
+          ephemeral: true
+        });
+      }
+
+      if (memberToBan && memberToBan.roles.highest.position >= member.roles.highest.position) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor("#e44144")
+            .setTitle("Action Denied")
+            .setDescription("You cannot ban a user with a higher or equal role.")
+            .setTimestamp()],
+          ephemeral: true
+        });
+      }
       const banningUser = interaction.options.getUser("user");
       const reason = interaction.options.getString("reason");
       const image = interaction.options.getAttachment("image");
