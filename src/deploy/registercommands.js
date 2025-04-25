@@ -37,7 +37,7 @@ const rest = new REST().setToken(process.env.TOKEN);
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
 		// Array of guild IDs
-		const guildIds = ['1078478406745866271', '857445688932696104'];
+		const guildIds = ['1078478406745866271', '857445688932696104', '1313768451768188948'];
 		const clientId = process.env.CLIENT_ID; // Your bot's client ID
 
 		for (const guildId of guildIds) {
@@ -45,7 +45,16 @@ const rest = new REST().setToken(process.env.TOKEN);
 				Routes.applicationGuildCommands(clientId, guildId.trim()),
 				{ body: commands },
 			);
-			const guildName = guildId === '1078478406745866271' ? 'KIAD' : 'KOG'; // I Know I like it saying the guild name 
+			let guildName;
+			if (guildId === '1078478406745866271') {
+				guildName = 'KIAD';
+			} else if (guildId === '857445688932696104') {
+				guildName = 'KOG';
+			} else if (guildId === '1313768451768188948') {
+				guildName = 'SQUADS';
+			} else {
+				guildName = 'Unknown Guild'; // best code trust me
+			}
 			console.log(`Successfully reloaded ${data.length} application (/) commands for guild ${guildName}.`);
 		}
 	}

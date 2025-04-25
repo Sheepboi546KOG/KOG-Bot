@@ -1,7 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
-const modSchema = require("../../schemas/mods"); 
+const adminSchema = require("../../schemas/admin");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -34,9 +34,9 @@ module.exports = {
         .setDescription("Scope of the ban")
         .setRequired(true)
         .addChoices(
-          { name: "KIAD", value: "Kleiner Internal Affairs Department" },
-          { name: "KOG", value: "Kleiner Oil Group" },
-          { name: "Squadrons", value: "[KOG] Squadrons" },
+          { name: "KIAD", value: "KIAD" },
+          { name: "KOG", value: "KOG" },
+          { name: "Squadrons", value: "Squadrons" },
           { name: "ALL", value: "ALL" }
         )
     )
@@ -48,9 +48,13 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      
       const member = interaction.member;
-      const hasPermission = await modSchema.findOne({ userId: interaction.user.id });
+      const hasPermission = await adminSchema.findOne({ userId: interaction.user.id });
+      const banningUser = interaction.options.getUser("user");
+      const reason = interaction.options.getString("reason");
+      const image = interaction.options.getAttachment("image");
+      const appealableAfter = interaction.options.getString("appealable_after");
+      const banScope = interaction.options.getString("ban_scope");
 
       if (!hasPermission) {
         return interaction.reply({
@@ -74,59 +78,38 @@ module.exports = {
         });
       }
 
-      if (memberToBan && memberToBan.roles.highest.position >= member.roles.highest.position) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot ban a user with a higher or equal role.")
-            .setTimestamp()],
-          ephemeral: true
-        });
-      }
-      const banningUser = interaction.options.getUser("user");
-      const reason = interaction.options.getString("reason");
-      const image = interaction.options.getAttachment("image");
-      const appealableAfter = interaction.options.getString("appealable_after");
-      const banScope = interaction.options.getString("ban_scope");
+        const banningMember = interaction.guild.members.cache.get(banningUser.id);
+        if (banningMember && banningMember.roles.highest.position >= member.roles.highest.position) {
+          return interaction.reply({
+            embeds: [new EmbedBuilder()
+          .setColor("#e44144")
+          .setTitle("Action Denied")
+          .setDescription("You cannot ban a user with an equal or higher role.")
+          .setTimestamp()],
+            ephemeral: true
+          });
+        }
+      
 
-      const memberToBan = await interaction.guild.members.fetch(banningUser.id).catch(() => null);
+      const guildIds = {
+        KIAD: "1078478406745866271",
+        Squadrons: "1313768451768188948",
+        KOG: "857445688932696104"
+      };
 
-      if (banningUser.id === interaction.user.id) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot ban yourself.")
-            .setTimestamp()],
-          ephemeral: true
-        });
-      }
+      const guildsToBan = banScope === "ALL"
+        ? Object.values(guildIds)
+        : [guildIds[banScope]];
 
-      if (banningUser.bot) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot ban a bot.")
-            .setTimestamp()],
-          ephemeral: true
-        });
-      }
-
-      if (
-        memberToBan &&
-        memberToBan.roles.highest.position >= member.roles.highest.position
-      ) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Action Denied")
-            .setDescription("You cannot ban a user with a higher or equal role.")
-            .setTimestamp()],
-          ephemeral: true
-        });
-      }
+        for (const guildId of guildsToBan) {
+          const guild = interaction.client.guilds.cache.get(guildId);
+          if (guild) {
+            const memberToBan = await guild.members.fetch(banningUser.id).catch(() => null);
+            if (memberToBan) {
+              await memberToBan.ban({ reason }).catch(console.error);
+            }
+          }
+        }
 
       let appealTimestamp = null;
       if (appealableAfter !== "No Appeal") {
@@ -160,20 +143,6 @@ module.exports = {
 
       await banningUser.send({ embeds: [dmEmbed] }).catch(() => {
         console.warn(`Could not DM ${banningUser.tag}`);
-      });
-
-      await interaction.guild.members.ban(banningUser.id, {
-        reason: `${reason} | Issued by ${interaction.user.tag}`
-      }).catch((err) => {
-        console.error("Ban failed:", err);
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor("#e44144")
-            .setTitle("Ban Failed")
-            .setDescription("Unable to ban the specified user. They may have already left or I lack permissions.")
-            .setTimestamp()],
-          ephemeral: true
-        });
       });
 
       const logEmbed = new EmbedBuilder()

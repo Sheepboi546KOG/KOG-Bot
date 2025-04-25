@@ -341,7 +341,7 @@ module.exports = {
             await message.reply({
                 embeds: [{
                     title: "Event Concluded",
-                    description: `The event has been concluded by the host: **<@${interaction.user.id}>**.\n\nYou will be logged and the event has been removed from the database.`,
+                    description: `The event has been concluded by the host: **<@${interaction.user.id}>**.`,
                     color: 0x3498db,
                 }],
             });
