@@ -77,7 +77,7 @@ module.exports = {
         const image = interaction.options.getAttachment("image");
         const warningId = uuidv4();
 
-        if (!member.roles.cache.has(hrRole)) {
+        if (!haspermission) {
           const noPermissionEmbed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Permission Denied")
@@ -167,7 +167,7 @@ module.exports = {
 
         const warning = await Warning.findOne({ warningId });
 
-        if (!member.roles.cache.has(hrRole)) {
+        if (!haspermission) {
           const noPermissionEmbed = new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Permission Denied")

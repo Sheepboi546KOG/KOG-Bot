@@ -71,7 +71,6 @@ module.exports = {
                         .setRequired(true)
                 )
         ),
-    dev: true,
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();

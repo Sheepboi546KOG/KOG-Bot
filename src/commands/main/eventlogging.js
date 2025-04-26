@@ -11,7 +11,7 @@ module.exports = {
             const mrId = '1193414880498286703';
             const hrId = '917829003660910633';
             const eventChannel = interaction.client.channels.cache.get('1002610487378321520');
-            const restrictedGuildIds = ['1313768451768188948', '1078478406745866271'];
+            const restrictedGuildIds = ['1313768451768188948', '1078478406745866271',''];
             const memberRoles = interaction.member.roles.cache;
             const interactionMessages = [];
 

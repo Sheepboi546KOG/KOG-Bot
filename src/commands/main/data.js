@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, Colors } = require('discord.js');
-const MyData = require('../../schemas/mydata');
+const MyData = require('../../schemas/mydata.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -46,17 +46,35 @@ module.exports = {
             const userData = await MyData.findOne({ userId: user.id });
 
             if (!userData) {
-                return interaction.reply({
-                    embeds: [new EmbedBuilder()
-                        .setTitle("User Not Found")
-                        .setDescription(`No data found for the user <@${user.id}>.`)
-                        .setColor(Colors.Red)],
-                    ephemeral: true,
+                const newUserData = new MyData({
+                    userId: user.id,
+                    eventsAttended: 0,
+                    eventsHosted: 0,
+                    merits: 0,
                 });
-            }
 
-            userData[field] = value;
-            await userData.save();
+                newUserData[field] = value;
+                await newUserData.save();
+            } else {
+                if (field === "eventsAttended") {
+                    userData.eventsAttended += value;
+                } else if (field === "eventsHosted") {
+                    userData.eventsHosted += value;
+                } else if (field === "merits") {
+                    userData.merits += value;
+                } else {
+                    return interaction.reply({
+                        embeds: [new EmbedBuilder()
+                            .setTitle("Invalid Field")
+                            .setDescription("The specified field is not valid.")
+                            .setColor(Colors.Red)],
+                        ephemeral: true,
+                    });
+                }
+
+     
+                await userData.save();
+            }
 
             return interaction.reply({
                 embeds: [new EmbedBuilder()
