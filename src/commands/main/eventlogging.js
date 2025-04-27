@@ -204,6 +204,16 @@ module.exports = {
                                 }
                             }
 
+                            const hostId = interaction.user.id;
+                            const hostData = await MyData.findOne({ userId: hostId });
+
+                            if (hostData) {
+                                await MyData.updateOne({ userId: hostId }, { $inc: { eventsHosted: 1 } });
+                            } else {
+                                const newHostData = new MyData({ userId: hostId, eventsHosted: 1 });
+                                await newHostData.save();
+                            }
+
                            
 
                             for (const userId of meritAttendees) {
