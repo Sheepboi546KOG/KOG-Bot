@@ -77,6 +77,29 @@ module.exports = {
         });
       }
 
+      const member = await interaction.guild.members.fetch(banningUser.id).catch(() => null);
+      if (!member) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+        .setColor("#e44144")
+        .setTitle("Action Denied")
+        .setDescription("The specified user is not a member of this server.")
+        .setTimestamp()],
+          ephemeral: true
+        });
+      }
+
+      if (interaction.member.roles.highest.comparePositionTo(member.roles.highest) <= 0) {
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+        .setColor("#e44144")
+        .setTitle("Action Denied")
+        .setDescription("You cannot ban a user with an equal or higher role.")
+        .setTimestamp()],
+          ephemeral: true
+        });
+      }
+
       const guildIds = {
         KIAD: ["1078478406745866271"],
         Squadrons: ["1313768451768188948"],

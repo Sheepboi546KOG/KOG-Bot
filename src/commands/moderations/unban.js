@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
-const modSchema = require("../../schemas/mods");
+const adminSchema = require("../../schemas/admin");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -28,7 +28,7 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const hasPermission = await modSchema.findOne({ userId: interaction.user.id });
+      const hasPermission = await adminSchema.findOne({ userId: interaction.user.id });
 
       if (!hasPermission) {
         return interaction.reply({

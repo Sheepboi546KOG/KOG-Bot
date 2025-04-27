@@ -38,7 +38,13 @@ module.exports = {
                 messageLink: message.id
             });
 
-            await interaction.user.send(`✅ Your event has been scheduled!\n**UUID:** \`${uuid}\`\n**Time:** <t:${unix}:F>\nYou’ll need this UUID to cancel, postpone, start, or conclude the event.`);
+            const confirmationEmbed = new EmbedBuilder()
+                .setColor(Colors.Green)
+                .setTitle('Event Scheduled Successfully!')
+                .setDescription(`Your event has been scheduled successfully!\n\n**UUID:** \`${uuid}\`\n**Time:** <t:${unix}:F>\n\nYou’ll need this UUID to cancel, postpone, start, or conclude the event.`)
+                .setTimestamp();
+
+            await interaction.user.send({ embeds: [confirmationEmbed] });
 
             await interaction.reply({ content: '✅ Event scheduled and announced!', ephemeral: true });
         } catch (err) {
