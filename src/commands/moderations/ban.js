@@ -48,7 +48,6 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const member = interaction.member;
       const hasPermission = await adminSchema.findOne({ userId: interaction.user.id });
       const banningUser = interaction.options.getUser("user");
       const reason = interaction.options.getString("reason");
@@ -78,38 +77,18 @@ module.exports = {
         });
       }
 
-        const banningMember = interaction.guild.members.cache.get(banningUser.id);
-        if (banningMember && banningMember.roles.highest.position >= member.roles.highest.position) {
-          return interaction.reply({
-            embeds: [new EmbedBuilder()
-          .setColor("#e44144")
-          .setTitle("Action Denied")
-          .setDescription("You cannot ban a user with an equal or higher role.")
-          .setTimestamp()],
-            ephemeral: true
-          });
-        }
-      
-
       const guildIds = {
-        KIAD: "1078478406745866271",
-        Squadrons: "1313768451768188948",
-        KOG: "857445688932696104"
+        KIAD: ["1078478406745866271"],
+        Squadrons: ["1313768451768188948"],
+        KOG: ["857445688932696104"],
+        ALL: [
+          "1078478406745866271", 
+          "1313768451768188948", 
+          "857445688932696104"
+        ]
       };
 
-      const guildsToBan = banScope === "ALL"
-        ? Object.values(guildIds)
-        : [guildIds[banScope]];
-
-        for (const guildId of guildsToBan) {
-          const guild = interaction.client.guilds.cache.get(guildId);
-          if (guild) {
-            const memberToBan = await guild.members.fetch(banningUser.id).catch(() => null);
-            if (memberToBan) {
-              await memberToBan.ban({ reason }).catch(console.error);
-            }
-          }
-        }
+      const guildsToBan = guildIds[banScope] || [];
 
       let appealTimestamp = null;
       if (appealableAfter !== "No Appeal") {
@@ -135,16 +114,35 @@ module.exports = {
         .setTitle("You Have Been Banned")
         .setDescription(
           banScope === "ALL"
-            ? `You have been banned from Kleiner Oil Group and all of its respective servers.\n${formattedAppealMessage}`
-            : `You have been banned from the following scope: ${banScope}.\n${formattedAppealMessage}`
+          ? `You have been banned from Kleiner Oil Group and all of its respective servers.\n${formattedAppealMessage}`
+          : `You have been banned from the following scope: ${banScope}.\n${formattedAppealMessage}`
         )
         .addFields({ name: "Reason", value: reason })
         .setTimestamp();
 
+      // Try DM user
       await banningUser.send({ embeds: [dmEmbed] }).catch(() => {
         console.warn(`Could not DM ${banningUser.tag}`);
       });
 
+      // Ban in all specified guilds
+      for (const guildId of guildsToBan) {
+        try {
+          const guild = await interaction.client.guilds.fetch(guildId).catch(() => null);
+          if (!guild) continue;
+
+          const memberToBan = await guild.members.fetch(banningUser.id).catch(() => null);
+          if (!memberToBan) continue;
+
+          await memberToBan.ban({ reason });
+          console.log(`Successfully banned user ${banningUser.id} in guild ${guildId}`);
+        } catch (error) {
+          console.error(`Failed to ban user ${banningUser.id} in guild ${guildId}:`, error);
+          continue;
+        }
+      }
+
+      // Log webhook
       const logEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("🚨 | Member Banned | 🚨")
@@ -165,8 +163,8 @@ module.exports = {
       const successEmbed = new EmbedBuilder()
         .setColor("#2da4cc")
         .setTitle("Ban Executed")
-        .setDescription(`Successfully banned <@${banningUser.id}> and logged the action.`)
-        .addFields({ name: "Reason", value: reason })
+        .setDescription(`Successfully banned <@${banningUser.id}>.`)
+        .addFields({ name: "Scope", value: banScope }, { name: "Reason", value: reason })
         .setTimestamp();
 
       return interaction.reply({ embeds: [successEmbed], ephemeral: true });

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
-const modSchema = require("../../schemas/mods"); 
+const modSchema = require("../../schemas/mods");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,17 +19,15 @@ module.exports = {
         .setDescription("Scope of the unban")
         .setRequired(true)
         .addChoices(
-          { name: "KIAD", value: "Kleiner Internal Affairs Department" },
-          { name: "KOG", value: "Kleiner Oil Group" },
-          { name: "Squadrons", value: "[KOG] Squadrons" },
+          { name: "KIAD", value: "KIAD" },
+          { name: "KOG", value: "KOG" },
+          { name: "Squadrons", value: "Squadrons" },
           { name: "ALL", value: "ALL" }
         )
     ),
 
   async execute(interaction) {
     try {
-      
-      const member = interaction.member;
       const hasPermission = await modSchema.findOne({ userId: interaction.user.id });
 
       if (!hasPermission) {
@@ -47,61 +45,68 @@ module.exports = {
       const reason = interaction.options.getString("reason");
       const unbanScope = interaction.options.getString("unban_scope");
 
-      // Attempt to unban the user
-      try {
-        await interaction.guild.members.unban(userId, reason);
-      } catch (error) {
-        console.error("Error unbanning user:", error);
+      const guildIds = {
+        KIAD: "1078478406745866271",
+        KOG: "857445688932696104",
+        Squadrons: "1313768451768188948"
+      };
+
+      const guildsToUnban = unbanScope === "ALL"
+        ? Object.values(guildIds)
+        : [guildIds[unbanScope]];
+
+      let unbannedFrom = [];
+
+      for (const guildId of guildsToUnban) {
+        const guild = interaction.client.guilds.cache.get(guildId);
+        if (guild) {
+          try {
+            await guild.members.unban(userId, reason);
+            unbannedFrom.push(guild.name);
+          } catch (error) {
+            if (error.code === 10026) { // Unknown Ban error
+              console.log(`User is not banned in guild ${guild.name}. Skipping.`);
+              continue;
+            } else {
+              console.error(`Error unbanning user from guild ${guild.name}:`, error);
+              continue;
+            }
+          }
+        }
+      }
+
+      if (unbannedFrom.length === 0) {
         return interaction.reply({
           embeds: [new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Unban Failed")
-            .setDescription("Unable to unban the specified user. They may not be banned.")
+            .setDescription("The user was not banned in any of the selected scopes.")
             .setTimestamp()],
           ephemeral: true
         });
       }
 
-      // Notify the user via DM
-      const unbannedUser = await interaction.client.users.fetch(userId).catch(() => null);
-      if (unbannedUser) {
-        const dmEmbed = new EmbedBuilder()
-          .setColor("#2da4cc")
-          .setTitle("You Have Been Unbanned")
-          .setDescription(
-            unbanScope === "ALL"
-              ? "You have been unbanned from Kleiner Oil Group and all of its respective servers. You can rejoin here: [KOG](https://discord.gg/HvtsjFvh)"
-              : `You have been unbanned from the following scope: ${unbanScope}.`
-          )
-          .addFields({ name: "Reason", value: reason })
-          .setTimestamp();
-
-        await unbannedUser.send({ embeds: [dmEmbed] }).catch(() => {
-          console.warn(`Could not DM user with ID ${userId}`);
-        });
-      }
-
-      // Log the unban action
       const logEmbed = new EmbedBuilder()
         .setColor("#2da4cc")
         .setTitle("🚨 | Member Unbanned | 🚨")
         .setDescription(
-          `A member has been unbanned in the following scope: **${unbanScope}**\n\n**User ID:** ${userId}\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>`
+          `A member has been unbanned.\n\n**User ID:** <@${userId}>\n**Reason:** ${reason}\n**Scopes Unbanned:** ${unbannedFrom.join(", ")}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>`
         )
         .setTimestamp();
 
       const IAWEBHOOK = process.env.IAWEBHOOK;
       if (IAWEBHOOK) {
-        await axios.post(IAWEBHOOK, {
-          embeds: [logEmbed.toJSON()]
-        }).catch(console.error);
+        try {
+          await axios.post(IAWEBHOOK, { embeds: [logEmbed.toJSON()] });
+        } catch (error) {
+          console.error("Error sending webhook:", error);
+        }
       }
 
-      // Reply to the moderator
       const successEmbed = new EmbedBuilder()
         .setColor("#2da4cc")
         .setTitle("Unban Executed")
-        .setDescription(`Successfully unbanned the user with ID ${userId} from the scope: **${unbanScope}** and logged the action.`)
+        .setDescription(`Successfully unbanned the user with ID **${userId}** from: **${unbannedFrom.join(", ")}**.`)
         .addFields({ name: "Reason", value: reason })
         .setTimestamp();
 
