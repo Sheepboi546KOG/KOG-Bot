@@ -287,13 +287,13 @@ module.exports = {
             if (event.messageLink) {
                 const message = await eventChannel.messages.fetch(event.messageLink);
                 await message.reply({
+                    content: `<@&857447103097602058>, <@&896891649064575016>`,
                     embeds: [{
                         title: "Event Started",
                         description: `The event has started! Hosted by: **<@${interaction.user.id}>**.\n\nPlease join the event if you haven't already.` +
                             (notes ? `\n\n**Notes:** ${notes}` : '') +
                             (link ? `\n\n[Join the event](${link})` : ''),
                         color: 0x57f287,
-                        content: `<@&857447103097602058>, <@&896891649064575016>`,
                     }],
                 });
             }
