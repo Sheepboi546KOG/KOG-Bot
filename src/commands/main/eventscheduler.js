@@ -24,8 +24,8 @@ module.exports = {
         )
         .addSubcommand(subcommand =>
             subcommand
-                .setName('postpone')
-                .setDescription('Postpone an existing event')
+                .setName('reschedule')
+                .setDescription('reschedule an existing event')
                 .addStringOption(option =>
                     option
                         .setName('id')
@@ -232,8 +232,8 @@ module.exports = {
                 const message = await eventChannel.messages.fetch(event.messageLink);
                 await message.reply({
                     embeds: [{
-                        title: "Event Postponed",
-                        description: `The event has been postponed to the new time: <t:${newUnixTimestamp}:F> by the host: **<@${interaction.user.id}>**.`,
+                        title: "Event Rescheduled",
+                        description: `The event has been Rescheduled to the new time: <t:${newUnixTimestamp}:F> by the host: **<@${interaction.user.id}>**.`,
                         color: 0xfee75c,
                     }],
                 });
