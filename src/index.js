@@ -4,11 +4,26 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../config.json');
 const mongoose = require('mongoose');
+const { DisTube } = require('distube');
+const { SpotifyPlugin } = require('@distube/spotify');
+const { SoundCloudPlugin } = require('@distube/soundcloud');
+const { YtDlpPlugin } = require('@distube/yt-dlp');
 
 const isDevMode = process.argv.includes('--dev');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] });
 client.commands = new Collection();
+
+const distube = new DisTube(client, {
+    plugins: [
+        new SpotifyPlugin(),
+        new SoundCloudPlugin(),
+        new YtDlpPlugin()
+    ]
+})
+
+client.distube = distube;
+
 require('./handlers/modalHandler')(client);
 
 const folders = path.join(__dirname, 'commands');
@@ -85,6 +100,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 ephemeral: true,
             });
         }
+        
 
         const command = client.commands.get(interaction.commandName);
         if (!command) return;
@@ -117,7 +133,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, {})
 	.then(() => console.log('Connected to MongoDB successfully.'))
 	.catch((error) => {
 		console.error('Error connecting to MongoDB:', error);
