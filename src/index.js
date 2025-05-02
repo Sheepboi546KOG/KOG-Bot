@@ -8,6 +8,8 @@ const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
+require('ffmpeg-static');
+require('fluent-ffmpeg');
 
 const isDevMode = process.argv.includes('--dev');
 
