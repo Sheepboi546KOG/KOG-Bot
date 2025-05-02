@@ -17,7 +17,6 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 client.commands = new Collection();
 
 const distube = new DisTube(client, {
-    ffmpeg: './src/bin/bin',
     plugins: [
         new SpotifyPlugin(),
         new SoundCloudPlugin(),
