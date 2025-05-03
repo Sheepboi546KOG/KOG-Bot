@@ -11,6 +11,13 @@ const { YtDlpPlugin } = require('@distube/yt-dlp');
 require('ffmpeg-static');
 require('fluent-ffmpeg');
 
+const path = require('path');
+process.env.FFMPEG_PATH = path.join(__dirname, 'ffmpeg-bin', 'ffmpeg');
+
+const ffmpeg = require('fluent-ffmpeg');
+ffmpeg.setFfmpegPath(process.env.FFMPEG_PATH);
+ffmpeg.setFfprobePath(path.join(__dirname, 'ffmpeg-bin', 'ffprobe'));
+
 const isDevMode = process.argv.includes('--dev');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] });
