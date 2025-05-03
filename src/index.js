@@ -58,10 +58,6 @@ client.once(Events.ClientReady, () => {
     }, 5000); 
 });
 
-distube.once('addSong', (queue, song) => {
-    console.log(`Added song: ${song.name} to the queue!`);
-    queue.textChannel.send(`Added **${song.name}** to the queue!`);
-});
 client.on(Events.InteractionCreate, async (interaction) => {
     const devUsers = config.developers || [];
 
