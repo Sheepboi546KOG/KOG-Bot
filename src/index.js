@@ -4,34 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const config = require('../config.json');
 const mongoose = require('mongoose');
-const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
-const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
-require('ffmpeg-static');
-require('fluent-ffmpeg');
 
-const ffmpegPath = require('ffmpeg-static');
-const ffprobePath = require('@ffprobe-installer/ffprobe').path;
-const ffmpeg = require('fluent-ffmpeg');
-
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
 
 const isDevMode = process.argv.includes('--dev');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] });
 client.commands = new Collection();
-
-const distube = new DisTube(client, {
-    plugins: [
-        new SpotifyPlugin(),
-        new SoundCloudPlugin(),
-        new YtDlpPlugin()
-    ]
-})
-
-client.distube = distube;
 
 require('./handlers/modalHandler')(client);
 
