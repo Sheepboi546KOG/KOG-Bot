@@ -11,7 +11,6 @@ const { YtDlpPlugin } = require('@distube/yt-dlp');
 require('ffmpeg-static');
 require('fluent-ffmpeg');
 
-const path = require('path');
 process.env.FFMPEG_PATH = path.join(__dirname, 'ffmpeg-bin', 'ffmpeg');
 
 const ffmpeg = require('fluent-ffmpeg');
