@@ -11,6 +11,25 @@ const isDevMode = process.argv.includes('--dev');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] });
 client.commands = new Collection();
 
+process.env.FFMPEG_PATH = require('ffmpeg-static');
+
+const { DisTube } = require('distube');
+const { SpotifyPlugin } = require('@distube/spotify');
+const { SoundCloudPlugin } = require('@distube/soundcloud');
+const { YtDlpPlugin } = require('@distube/yt-dlp');
+
+
+
+const distube = new DisTube(client, {
+  plugins: [
+    new SpotifyPlugin(),
+    new SoundCloudPlugin(),
+    new YtDlpPlugin(),
+  ],
+});
+
+client.distube = distube;
+
 require('./handlers/modalHandler')(client);
 
 const folders = path.join(__dirname, 'commands');
