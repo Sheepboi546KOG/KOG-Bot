@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.18.0",
     "@distube/soundcloud": "^2.0.4",
     "@distube/spotify": "^2.0.2",
