@@ -44,8 +44,6 @@ module.exports = {
       option.setName("image").setDescription("Image evidence").setRequired(false)
     ),
 
-  dev: true,
-
   async execute(interaction) {
     try {
       const hasPermission = await adminSchema.findOne({ userId: interaction.user.id });
