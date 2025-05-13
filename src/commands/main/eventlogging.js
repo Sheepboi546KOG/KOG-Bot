@@ -27,7 +27,7 @@ module.exports = {
                 }
             }
 
-            if (!memberRoles.has(mrId) && !memberRoles.has(hrId)) {
+           if (!memberRoles.has(mrId) && !memberRoles.has(hrId) && !memberRoles.has('875599118632878092')) {
                 return interaction.reply({
                     embeds: [new EmbedBuilder()
                         .setTitle("No Permission")

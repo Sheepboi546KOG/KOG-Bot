@@ -75,13 +75,14 @@ module.exports = {
         });
       }
 
-      const member = await interaction.guild.members.fetch(banningUser.id).catch(() => null);
-      if (!member) {
+      let member = await interaction.guild.members.fetch(banningUser.id).catch(() => null);
+     
+      if (member && interaction.member.roles.highest.comparePositionTo(member.roles.highest) <= 0) {
         return interaction.reply({
           embeds: [new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("Action Denied")
-        .setDescription("The specified user is not a member of this server.")
+        .setDescription("You cannot ban a user with an equal or higher role.")
         .setTimestamp()],
           ephemeral: true
         });

@@ -29,7 +29,7 @@ module.exports = {
             const hrId = '917829003660910633';
             const memberRoles = interaction.member.roles.cache;
             
-            if (!memberRoles.has(mrId) && !memberRoles.has(hrId)) {
+            if (!memberRoles.has(mrId) && !memberRoles.has(hrId) && !memberRoles.has('875599118632878092')) {
                 return interaction.reply({
                     embeds: [new EmbedBuilder()
                         .setTitle("No Permission")
