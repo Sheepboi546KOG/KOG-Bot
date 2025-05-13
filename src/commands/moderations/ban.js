@@ -81,7 +81,7 @@ module.exports = {
           embeds: [new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("Action Denied")
-        .setDescription("The specified user is not a member of this server.")
+        .setDescription("The specified user is not a member of this or another server, please use the in built discord ban command.")
         .setTimestamp()],
           ephemeral: true
         });
