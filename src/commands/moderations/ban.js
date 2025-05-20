@@ -37,6 +37,7 @@ module.exports = {
           { name: "KIAD", value: "KIAD" },
           { name: "KOG", value: "KOG" },
           { name: "Squadrons", value: "Squadrons" },
+          { name: "Squads and KOG", value: "SQUAD_KOG" },
           { name: "ALL", value: "ALL" }
         )
     )
@@ -47,12 +48,6 @@ module.exports = {
   async execute(interaction) {
     try {
       const hasPermission = await adminSchema.findOne({ userId: interaction.user.id });
-      const banningUser = interaction.options.getUser("user");
-      const reason = interaction.options.getString("reason");
-      const image = interaction.options.getAttachment("image");
-      const appealableAfter = interaction.options.getString("appealable_after");
-      const banScope = interaction.options.getString("ban_scope");
-
       if (!hasPermission) {
         return interaction.reply({
           embeds: [new EmbedBuilder()
@@ -63,6 +58,12 @@ module.exports = {
           ephemeral: true
         });
       }
+
+      const banningUser = interaction.options.getUser("user");
+      const reason = interaction.options.getString("reason");
+      const image = interaction.options.getAttachment("image");
+      const appealableAfter = interaction.options.getString("appealable_after");
+      const banScope = interaction.options.getString("ban_scope");
 
       if (interaction.user.id === banningUser.id) {
         return interaction.reply({
@@ -75,42 +76,7 @@ module.exports = {
         });
       }
 
-      const member = await interaction.guild.members.fetch(banningUser.id).catch(() => null);
-      if (!member) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-        .setColor("#e44144")
-        .setTitle("Action Denied")
-        .setDescription("The specified user is not a member of this server.")
-        .setTimestamp()],
-          ephemeral: true
-        });
-      }
-
-      if (interaction.member.roles.highest.comparePositionTo(member.roles.highest) <= 0) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-        .setColor("#e44144")
-        .setTitle("Action Denied")
-        .setDescription("You cannot ban a user with an equal or higher role.")
-        .setTimestamp()],
-          ephemeral: true
-        });
-      }
-
-      const guildIds = {
-        KIAD: ["1078478406745866271"],
-        Squadrons: ["1313768451768188948"],
-        KOG: ["857445688932696104"],
-        ALL: [
-          "1078478406745866271", 
-          "1313768451768188948", 
-          "857445688932696104"
-        ]
-      };
-
-      const guildsToBan = guildIds[banScope] || [];
-
+      // Calculate appeal timestamp if applicable
       let appealTimestamp = null;
       if (appealableAfter !== "No Appeal") {
         const now = new Date();
@@ -130,45 +96,58 @@ module.exports = {
           ? "This ban is not appealable."
           : `This ban is ${appealableAfter} long and can be appealed after <t:${Math.floor(appealTimestamp.getTime() / 1000)}:F> in KIAD. Found [here](https://discord.gg/kQQfcg3k).`;
 
+      const guildIds = {
+        KIAD: ["1078478406745866271"],
+        Squadrons: ["1313768451768188948"],
+        KOG: ["857445688932696104"],
+        SQUAD_KOG: ["1313768451768188948", "857445688932696104"],
+        ALL: [
+          "1078478406745866271", 
+          "1313768451768188948", 
+          "857445688932696104"
+        ]
+      };
+
+      const guildsToBan = guildIds[banScope] || [];
+
+      let scopeDescription;
+      switch (banScope) {
+        case "ALL": scopeDescription = "Kleiner Oil Group and all of its respective servers"; break;
+        case "SQUAD_KOG": scopeDescription = "KOG Squadrons and Kleiner Oil Group"; break;
+        default: scopeDescription = banScope; break;
+      }
+
       const dmEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("You Have Been Banned")
-        .setDescription(
-          banScope === "ALL"
-          ? `You have been banned from Kleiner Oil Group and all of its respective servers.\n${formattedAppealMessage}`
-          : `You have been banned from the following scope: ${banScope}.\n${formattedAppealMessage}`
-        )
+        .setDescription(`You have been banned from the following scope: ${scopeDescription}.\n${formattedAppealMessage}`)
         .addFields({ name: "Reason", value: reason })
         .setTimestamp();
 
-      // Try DM user
+
       await banningUser.send({ embeds: [dmEmbed] }).catch(() => {
         console.warn(`Could not DM ${banningUser.tag}`);
       });
 
-      // Ban in all specified guilds
+    
       for (const guildId of guildsToBan) {
         try {
           const guild = await interaction.client.guilds.fetch(guildId).catch(() => null);
           if (!guild) continue;
 
-          const memberToBan = await guild.members.fetch(banningUser.id).catch(() => null);
-          if (!memberToBan) continue;
-
-          await memberToBan.ban({ reason });
-          console.log(`Successfully banned user ${banningUser.id} in guild ${guildId}`);
-        } catch (error) {
-          console.error(`Failed to ban user ${banningUser.id} in guild ${guildId}:`, error);
-          continue;
+          await guild.members.ban(banningUser.id, { reason }).catch((err) => {
+            console.warn(`Failed to ban ${banningUser.id} in guild ${guildId}`, err.message);
+          });
+        } catch (err) {
+          console.error(`Ban error in guild ${guildId}:`, err);
         }
       }
 
-      // Log webhook
       const logEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("🚨 | Member Banned | 🚨")
         .setDescription(
-          `A member has been banned in the following scope: **${banScope}**\n\n**User:** <@${banningUser.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>\n**Appealable After:** ${appealableAfter}`
+          `A member has been banned in the following scope: **${scopeDescription}**\n\n**User:** <@${banningUser.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>\n**Appealable After:** ${appealableAfter}`
         )
         .setTimestamp();
 
@@ -185,19 +164,21 @@ module.exports = {
         .setColor("#2da4cc")
         .setTitle("Ban Executed")
         .setDescription(`Successfully banned <@${banningUser.id}>.`)
-        .addFields({ name: "Scope", value: banScope }, { name: "Reason", value: reason })
+        .addFields({ name: "Scope", value: scopeDescription }, { name: "Reason", value: reason })
         .setTimestamp();
 
       return interaction.reply({ embeds: [successEmbed], ephemeral: true });
 
-    } catch (error) {
-      console.error("Error in ban command:", error);
-      const errorEmbed = new EmbedBuilder()
-        .setColor("#e44144")
-        .setTitle("Error")
-        .setDescription("An unexpected error occurred while executing the command.")
-        .setTimestamp();
-      return interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+    } catch (err) {
+      console.error("Ban Command Error:", err);
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor("#e44144")
+          .setTitle("Error")
+          .setDescription("An unexpected error occurred while executing the command.")
+          .setTimestamp()],
+        ephemeral: true
+      });
     }
   }
 };
