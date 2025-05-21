@@ -59,6 +59,8 @@ module.exports = {
         });
       }
 
+      await interaction.deferReply({ ephemeral: true });
+
       const banningUser = interaction.options.getUser("user");
       const reason = interaction.options.getString("reason");
       const image = interaction.options.getAttachment("image");
@@ -66,17 +68,16 @@ module.exports = {
       const banScope = interaction.options.getString("ban_scope");
 
       if (interaction.user.id === banningUser.id) {
-        return interaction.reply({
+        return interaction.editReply({
           embeds: [new EmbedBuilder()
             .setColor("#e44144")
             .setTitle("Action Denied")
             .setDescription("You cannot ban yourself.")
             .setTimestamp()],
-          ephemeral: true
         });
       }
 
-      // Calculate appeal timestamp if applicable
+      // Calculate appeal timestamp
       let appealTimestamp = null;
       if (appealableAfter !== "No Appeal") {
         const now = new Date();
@@ -94,90 +95,93 @@ module.exports = {
       const formattedAppealMessage =
         appealableAfter === "No Appeal"
           ? "This ban is not appealable."
-          : `This ban is ${appealableAfter} long and can be appealed after <t:${Math.floor(appealTimestamp.getTime() / 1000)}:F> in KIAD. Found [here](https://discord.gg/kQQfcg3k).`;
+          : `You may appeal after <t:${Math.floor(appealTimestamp.getTime() / 1000)}:F>. Appeal at [KIAD Discord](https://discord.gg/kQQfcg3k).`;
 
       const guildIds = {
         KIAD: ["1078478406745866271"],
         Squadrons: ["1313768451768188948"],
         KOG: ["857445688932696104"],
         SQUAD_KOG: ["1313768451768188948", "857445688932696104"],
-        ALL: [
-          "1078478406745866271", 
-          "1313768451768188948", 
-          "857445688932696104"
-        ]
+        ALL: ["1078478406745866271", "1313768451768188948", "857445688932696104"]
       };
 
       const guildsToBan = guildIds[banScope] || [];
 
       let scopeDescription;
       switch (banScope) {
-        case "ALL": scopeDescription = "Kleiner Oil Group and all of its respective servers"; break;
-        case "SQUAD_KOG": scopeDescription = "KOG Squadrons and Kleiner Oil Group"; break;
-        default: scopeDescription = banScope; break;
+        case "ALL":
+          scopeDescription = "Kleiner Oil Group and all its affiliated servers";
+          break;
+        case "SQUAD_KOG":
+          scopeDescription = "KOG Squadrons and Kleiner Oil Group";
+          break;
+        default:
+          scopeDescription = banScope;
+          break;
       }
 
       const dmEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("You Have Been Banned")
-        .setDescription(`You have been banned from the following scope: ${scopeDescription}.\n${formattedAppealMessage}`)
+        .setDescription(`You have been banned from: **${scopeDescription}**.\n\n${formattedAppealMessage}`)
         .addFields({ name: "Reason", value: reason })
         .setTimestamp();
 
-
+      let dmWork = true;
       await banningUser.send({ embeds: [dmEmbed] }).catch(() => {
+        dmWork = false;
         console.warn(`Could not DM ${banningUser.tag}`);
       });
 
-    
       for (const guildId of guildsToBan) {
-        try {
-          const guild = await interaction.client.guilds.fetch(guildId).catch(() => null);
-          if (!guild) continue;
+        const guild = await interaction.client.guilds.fetch(guildId).catch(() => null);
+        if (!guild) continue;
 
-          await guild.members.ban(banningUser.id, { reason }).catch((err) => {
-            console.warn(`Failed to ban ${banningUser.id} in guild ${guildId}`, err.message);
-          });
-        } catch (err) {
-          console.error(`Ban error in guild ${guildId}:`, err);
-        }
+        await guild.members.ban(banningUser.id, { reason }).catch((err) => {
+          console.warn(`Failed to ban ${banningUser.id} in guild ${guildId}:`, err.message);
+        });
       }
 
       const logEmbed = new EmbedBuilder()
         .setColor("#e44144")
         .setTitle("🚨 | Member Banned | 🚨")
         .setDescription(
-          `A member has been banned in the following scope: **${scopeDescription}**\n\n**User:** <@${banningUser.id}>\n**Reason:** ${reason}\n**Date:** <t:${Math.floor(Date.now() / 1000)}:F>\n**Moderator:** <@${interaction.user.id}>\n**Appealable After:** ${appealableAfter}`
+          `User has been banned from the following scopes: ${scopeDescription}\n**User:** <@${banningUser.id}>\n**Reason:** ${reason}\n**Scope:** ${scopeDescription}\n**Moderator:** <@${interaction.user.id}>\n**Appealable After:** ${appealableAfter}` +
+          (dmWork ? "" : "\n\n⚠️ **DM failed. It's recommended to notify the user manually.**")
         )
         .setTimestamp();
 
       if (image) logEmbed.setImage(image.url);
 
-      const IAWEBHOOK = process.env.IAWEBHOOK;
-      if (IAWEBHOOK) {
-        await axios.post(IAWEBHOOK, {
+      if (process.env.IAWEBHOOK) {
+        await axios.post(process.env.IAWEBHOOK, {
           embeds: [logEmbed.toJSON()]
-        }).catch(console.error);
+        }).catch(err => {
+          console.error("Failed to post to webhook:", err.message);
+        });
       }
 
       const successEmbed = new EmbedBuilder()
         .setColor("#2da4cc")
-        .setTitle("Ban Executed")
+        .setTitle("✅ Ban Executed")
         .setDescription(`Successfully banned <@${banningUser.id}>.`)
-        .addFields({ name: "Scope", value: scopeDescription }, { name: "Reason", value: reason })
+        .addFields(
+          { name: "Scope", value: scopeDescription },
+          { name: "Reason", value: reason },
+          { name: "Appealable After", value: appealableAfter }
+        )
         .setTimestamp();
 
-      return interaction.reply({ embeds: [successEmbed], ephemeral: true });
+      return interaction.editReply({ embeds: [successEmbed] });
 
     } catch (err) {
       console.error("Ban Command Error:", err);
-      return interaction.reply({
+      return interaction.editReply({
         embeds: [new EmbedBuilder()
           .setColor("#e44144")
           .setTitle("Error")
           .setDescription("An unexpected error occurred while executing the command.")
           .setTimestamp()],
-        ephemeral: true
       });
     }
   }
