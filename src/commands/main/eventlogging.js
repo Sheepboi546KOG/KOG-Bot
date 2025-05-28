@@ -71,7 +71,7 @@ module.exports = {
             });
 
             eventSelectCollector.on("collect", async (i) => {
-                let attendees = []; 
+                let attendees = [];
                 const eventType = i.values[0];
 
                 const attendeesEmbed = new EmbedBuilder()
@@ -92,17 +92,31 @@ module.exports = {
                 });
                 interactionMessages.push(attendeesPrompt);
 
+                let attendeeMessage = null;
+
                 const mentionCollector = interaction.channel.createMessageCollector({
-                    filter: m => m.author.id === interaction.user.id && m.mentions.users.size > 0,
+                    filter: m => m.author.id === interaction.user.id,
                     time: 60000
                 });
 
                 mentionCollector.on("collect", (message) => {
                     interactionMessages.push(message);
-                    message.mentions.users.forEach(user => {
-                        const mention = user.id; 
-                        if (!attendees.includes(mention)) attendees.push(mention);
-                    });
+
+                    if (!attendeeMessage && message.mentions.users.size > 0) {
+
+                        const pingRegex = /^(<@!?(\d+)> ?)+$/;
+                        if (pingRegex.test(message.content.trim())) {
+                            attendeeMessage = message;
+                            message.mentions.users.forEach(user => {
+                                const mention = user.id;
+                                if (!attendees.includes(mention)) attendees.push(mention);
+                            });
+                        } else {
+                            mentionCollector.stop();
+                            cleanup(interactionMessages);
+                            message.reply({ content: "❌ Event log canceled: Please only send a message with user pings (e.g. <@123><@456>).", ephemeral: true });
+                        }
+                    }
                 });
 
                 const buttonCollector = attendeesPrompt.createMessageComponentCollector({
@@ -116,6 +130,12 @@ module.exports = {
 
                     if (btn.customId === "cancel") {
                         await btn.reply({ content: "❌ Event log process canceled.", ephemeral: true });
+                        return cleanup(interactionMessages);
+                    }
+
+                   
+                    if (!attendeeMessage || attendees.length === 0) {
+                        await btn.reply({ content: "❌ Event log canceled: No valid attendee pings were provided.", ephemeral: true });
                         return cleanup(interactionMessages);
                     }
 

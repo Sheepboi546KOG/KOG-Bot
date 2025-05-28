@@ -57,11 +57,11 @@ module.exports = {
                 await newUserData.save();
             } else {
                 if (field === "eventsAttended") {
-                    userData.eventsAttended += value;
+                    userData.eventsAttended = value;
                 } else if (field === "eventsHosted") {
-                    userData.eventsHosted += value;
+                    userData.eventsHosted = value;
                 } else if (field === "merits") {
-                    userData.merits += value;
+                    userData.merits = value;
                 } else {
                     return interaction.reply({
                         embeds: [new EmbedBuilder()
@@ -71,8 +71,6 @@ module.exports = {
                         ephemeral: true,
                     });
                 }
-
-     
                 await userData.save();
             }
 
