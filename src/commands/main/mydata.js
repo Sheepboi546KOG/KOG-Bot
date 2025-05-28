@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, Colors } = require('discord.js');
 const MyData = require('../../schemas/mydata');
 
-const mrId = '11934148804982867033';
-const hrId = '9178290036609106333';
+const mrId = '1193414880498286703';
+const hrId = '917829003660910633';
 
 module.exports = {
     data: new SlashCommandBuilder()
