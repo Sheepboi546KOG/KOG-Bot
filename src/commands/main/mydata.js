@@ -20,9 +20,7 @@ module.exports = {
             const targetUser = interaction.options.getUser('user') || interaction.user;
             if (targetUser.id !== interaction.user.id) {
                 const member = await interaction.guild.members.fetch(interaction.user.id);
-                const hasPermission = member.roles.cache.some(role =>
-                    [mrId, hrId].includes(role.id)
-                );
+                const hasPermission = member.roles.cache.has(mrId) || member.roles.cache.has(hrId);
                 if (!hasPermission) {
                     const embed = new EmbedBuilder()
                         .setColor(Colors.Red)
