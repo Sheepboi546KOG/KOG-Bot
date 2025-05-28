@@ -78,8 +78,8 @@ module.exports = {
                     return interaction.reply({ content: 'No mods found.', ephemeral: true });
                 }
 
-                const modList = mods.map(mod => `${mod.userId} (Username: ${mod.username})`).join('\n');
-                interaction.reply({ content: `Current mods:\n${modList}` });
+                const modList = mods.map(mod => `<@${mod.userId}> (Username: ${mod.username})`).join('\n');
+                interaction.reply({ content: `Current mods:\n${modList}`, ephemeral: true });
             }
         } catch (error) {
             console.error(error);

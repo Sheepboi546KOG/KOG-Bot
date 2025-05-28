@@ -78,7 +78,7 @@ module.exports = {
                     return interaction.reply({ content: 'No admins found.', ephemeral: true });
                 }
 
-                const adminList = admins.map(admin => `${admin.userId} (ID: ${admin.username})`).join('\n');
+                const adminList = admins.map(admin => `<@${admin.userId}>`).join('\n');
                 interaction.reply({ content: `Current admins:\n${adminList}` });
             }
         } catch (error) {
