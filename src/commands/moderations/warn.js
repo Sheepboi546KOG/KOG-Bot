@@ -18,11 +18,6 @@ module.exports = {
         .addAttachmentOption(option => option.setName("image").setDescription("Image evidence").setRequired(false)))
     .addSubcommand(subcommand =>
       subcommand
-        .setName("check")
-        .setDescription("Check all warnings for a user")
-        .addUserOption(option => option.setName("user").setDescription("User to check warnings for").setRequired(true)))
-    .addSubcommand(subcommand =>
-      subcommand
         .setName("remove")
         .setDescription("Remove a warning from a user")
         .addStringOption(option => option.setName("warningid").setDescription("ID of the warning to remove").setRequired(true))
@@ -68,9 +63,6 @@ module.exports = {
       const subcommand = interaction.options.getSubcommand();
       const IAWEBHOOK = process.env.IAWEBHOOK;
 
-
-     
-      
       if (subcommand === "give") {
         const warnedUser = interaction.options.getUser("user");
         const reason = interaction.options.getString("reason");
@@ -85,8 +77,6 @@ module.exports = {
             .setTimestamp();
           return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
         }
-  
-        
   
           if (interaction.user.id === targetUser?.id) {
             const selfActionEmbed = new EmbedBuilder()
@@ -176,8 +166,6 @@ module.exports = {
           return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
         }
   
-        
-  
           if (interaction.user.id === targetUser?.id) {
             const selfActionEmbed = new EmbedBuilder()
               .setColor("#e44144")
@@ -236,32 +224,6 @@ module.exports = {
 
         return interaction.reply({ embeds: [successEmbed], ephemeral: true });
 
-      } else if (subcommand === "check") {
-        const userToCheck = interaction.options.getUser("user");
-        const warnings = await Warning.find({ userId: userToCheck.id });
-
-        if (warnings.length === 0) {
-          const embed = new EmbedBuilder()
-            .setColor("#2da4cc")
-            .setTitle("No Warnings Found")
-            .setDescription(`No warnings have been recorded for <@${userToCheck.id}>.`)
-            .setTimestamp();
-          return interaction.reply({ embeds: [embed], ephemeral: true });
-        }
-        const warningList = warnings.map((warning) => `
-      **Warning ID:** ${warning.warningId}
-      **Reason:** ${warning.reason}
-      **Date Issued:** <t:${Math.floor(new Date(warning.date).getTime() / 1000)}:F>
-      ${warning.image ? `**Evidence:** [View Image](${warning.image})` : ""}
-        `).join("\n────────────────────────\n");
-
-        const embed = new EmbedBuilder()
-          .setColor("#2da4cc")
-          .setTitle("User Warnings")
-          .setDescription(`Warnings for <@${userToCheck.id}>:\n\n${warningList}`)
-          .setTimestamp();
-
-        return interaction.reply({ embeds: [embed], ephemeral: true });
       }
 
     } catch (err) {

@@ -199,7 +199,7 @@ module.exports = {
                 }],
                 ephemeral: true,
             });
-        } else if (subcommand === 'reschedule') {
+        } else if (subcommand === 'postpone') {
             const newUnixTimestamp = interaction.options.getString('unix');
             const event = await schema.findOne({ uuid: eventId });
 
@@ -232,7 +232,6 @@ module.exports = {
                 const message = await eventChannel.messages.fetch(event.messageLink);
                 await message.reply({
                     embeds: [{
-                        content: `<@&857447103097602058>, <@&896891649064575016>`,
                         title: "Event Rescheduled",
                         description: `The event has been Rescheduled to the new time: <t:${newUnixTimestamp}:F> by the host: **<@${interaction.user.id}>**.`,
                         color: 0xfee75c,

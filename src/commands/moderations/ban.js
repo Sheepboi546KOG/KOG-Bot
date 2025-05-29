@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
 const adminSchema = require("../../schemas/admin");
+const Ban = require("../../schemas/bans.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -141,6 +142,16 @@ module.exports = {
           console.warn(`Failed to ban ${banningUser.id} in guild ${guildId}:`, err.message);
         });
       }
+
+      // Save to MongoDB
+      await Ban.create({
+        userId: banningUser.id,
+        reason,
+        bannedBy: interaction.user.id,
+        bannedAt: new Date(),
+        expiresAt: appealTimestamp || null,
+        active: true,
+      });
 
       const logEmbed = new EmbedBuilder()
         .setColor("#e44144")
