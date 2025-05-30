@@ -8,8 +8,7 @@ module.exports = {
         .setDescription("View a user's moderation logs.")
         .addUserOption(opt =>
             opt.setName("user").setDescription("User to check.").setRequired(true)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+        ),
 
     async execute(interaction) {
 
