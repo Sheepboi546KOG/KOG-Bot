@@ -11,8 +11,6 @@ module.exports = {
         ),
 
     async execute(interaction) {
-
-        // Check if the user has permission to use this comman
         const modSchema = require("../../schemas/mods.js");
          const haspermission = await modSchema.findOne({ userId: interaction.user.id });
         

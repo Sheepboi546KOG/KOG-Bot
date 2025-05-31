@@ -199,7 +199,7 @@ module.exports = {
                 }],
                 ephemeral: true,
             });
-        } else if (subcommand === 'postpone') {
+        } else if (subcommand === 'reschedule') {
             const newUnixTimestamp = interaction.options.getString('unix');
             const event = await schema.findOne({ uuid: eventId });
 
