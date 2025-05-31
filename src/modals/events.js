@@ -31,8 +31,8 @@ module.exports = {
                 .setTimestamp();
 
             const message = await channel.send({
-                content: `<@&857447103097602058>, <@&896891649064575016>`,
-                embeds: [embed]
+                embeds: [embed],
+                content: "<@&857447103097602058>, <@&896891649064575016>"
             });
             await message.react('✅');
 
