@@ -96,7 +96,7 @@ module.exports = {
 
                 const mentionCollector = interaction.channel.createMessageCollector({
                     filter: m => m.author.id === interaction.user.id,
-                    time: 60000
+                    time: 18000
                 });
 
                 mentionCollector.on("collect", (message) => {
