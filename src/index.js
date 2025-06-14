@@ -137,6 +137,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
+client.on(Events.MessageCreate, async (message) => {
+    if (message.author.bot) return;
+    if (/aladeen/i.test(message.content)) {
+        await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
+    }
+});
+
 
 
 mongoose.connect(process.env.MONGO_URI, {})
