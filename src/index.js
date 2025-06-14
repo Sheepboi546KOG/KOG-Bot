@@ -5,10 +5,16 @@ const path = require('path');
 const config = require('../config.json');
 const mongoose = require('mongoose');
 
-
 const isDevMode = process.argv.includes('--dev');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildVoiceStates] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildVoiceStates
+    ]
+});
 client.commands = new Collection();
 
 process.env.FFMPEG_PATH = require('ffmpeg-static');
@@ -18,16 +24,13 @@ const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 
-
-
 const distube = new DisTube(client, {
-  plugins: [
-    new SpotifyPlugin(),
-    new SoundCloudPlugin(),
-    new YtDlpPlugin(),
-  ],
+    plugins: [
+        new SpotifyPlugin(),
+        new SoundCloudPlugin(),
+        new YtDlpPlugin(),
+    ],
 });
-
 client.distube = distube;
 
 require('./handlers/modalHandler')(client);
@@ -35,17 +38,15 @@ require('./handlers/modalHandler')(client);
 const folders = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(folders);
 for (const folder of commandFolders) {
-	const commandsPath = path.join(folders, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-
-
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-		}
-	}
+    const commandsPath = path.join(folders, folder);
+    const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
+    for (const file of commandFiles) {
+        const filePath = path.join(commandsPath, file);
+        const command = require(filePath);
+        if ('data' in command && 'execute' in command) {
+            client.commands.set(command.data.name, command);
+        }
+    }
 }
 
 client.once(Events.ClientReady, () => {
@@ -58,7 +59,6 @@ client.once(Events.ClientReady, () => {
     const presences = isDevMode
         ? [
             { activities: [{ name: 'in Development Mode', type: ActivityType.Playing }], status: 'dnd' },
-            
         ]
         : [
             { activities: [{ name: 'with KOG logging!', type: ActivityType.Playing }], status: 'online' },
@@ -74,7 +74,7 @@ client.once(Events.ClientReady, () => {
     setInterval(() => {
         client.user.setPresence(presences[index]);
         index = (index + 1) % presences.length;
-    }, 5000); 
+    }, 5000);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -106,7 +106,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 ephemeral: true,
             });
         }
-        
 
         const command = client.commands.get(interaction.commandName);
         if (!command) return;
@@ -137,13 +136,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
-
+// 👇 ADDITION STARTS HERE 👇
+client.on('messageCreate', async (message) => {
+    if (message.author.bot) return;
+    const targetUserId = '845719138836021278';
+    if (message.author.id === targetUserId) {
+        try {
+            await message.reply({
+                content: 'https://cdn.discordapp.com/attachments/1313568200100679700/1381368850544857238/watermark.gif?ex=684f2c7e&is=684ddafe&hm=dfe4aea54839cb6cdcad540057bf21b2b4dcdc02ff6ec4db2190048adf81deee&'
+            });
+        } catch (error) {
+            console.error('Failed to auto-reply to target user:', error);
+        }
+    }
+});
+// 👆 ADDITION ENDS HERE 👆
 
 mongoose.connect(process.env.MONGO_URI, {})
-	.then(() => console.log('Connected to MongoDB successfully.'))
-	.catch((error) => {
-		console.error('Error connecting to MongoDB:', error);
-		process.exit(1);
-	});
+    .then(() => console.log('Connected to MongoDB successfully.'))
+    .catch((error) => {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    });
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN);
