@@ -145,7 +145,7 @@ client.on(Events.MessageCreate, async (message) => {
         await message.reply('<@1125601338768756756>');
         return;
     }
-})
+}})
 
 mongoose.connect(process.env.MONGO_URI, {})
 	.then(() => console.log('Connected to MongoDB successfully.'))
