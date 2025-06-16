@@ -52,8 +52,10 @@ module.exports = {
                 .setTitle(`${targetUser.id === interaction.user.id ? "Your" : `${targetUser.username}'s`} Event Stats`)
                 .addFields(
                     { name: "Events Attended", value: `${data.eventsAttended}`, inline: true },
+                    { name: "Trainings Attended", value: `${data.TrainingsAttended}`, inline: true },
                     { name: "Events Hosted", value: `${data.eventsHosted}`, inline: true },
                     { name: "Merits", value: `${data.merits}`, inline: true }
+                    
                 )
                 .setFooter({ text: `Requested by ${interaction.user.tag}` })
                 .setTimestamp();

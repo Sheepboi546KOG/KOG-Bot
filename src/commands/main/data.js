@@ -16,7 +16,8 @@ module.exports = {
                 .addChoices(
                     { name: "Events Attended", value: "eventsAttended" },
                     { name: "Events Hosted", value: "eventsHosted" },
-                    { name: "Merits", value: "merits" }
+                    { name: "Merits", value: "merits" },
+                    { name: "Trainings Attended", value: "TrainingsAttended" }
                 ))
         .addIntegerOption(option => 
             option.setName("value")
@@ -51,6 +52,7 @@ module.exports = {
                     eventsAttended: 0,
                     eventsHosted: 0,
                     merits: 0,
+                    TrainingsAttended: 0,
                 });
 
                 newUserData[field] = value;
@@ -58,6 +60,8 @@ module.exports = {
             } else {
                 if (field === "eventsAttended") {
                     userData.eventsAttended = value;
+                } else if (field === "TrainingsAttended") {
+                    userData.TrainingsAttended = value;
                 } else if (field === "eventsHosted") {
                     userData.eventsHosted = value;
                 } else if (field === "merits") {

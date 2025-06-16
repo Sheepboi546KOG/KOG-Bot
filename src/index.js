@@ -13,22 +13,6 @@ client.commands = new Collection();
 
 process.env.FFMPEG_PATH = require('ffmpeg-static');
 
-const { DisTube } = require('distube');
-const { SpotifyPlugin } = require('@distube/spotify');
-const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
-
-
-
-const distube = new DisTube(client, {
-  plugins: [
-    new SpotifyPlugin(),
-    new SoundCloudPlugin(),
-    new YtDlpPlugin(),
-  ],
-});
-
-client.distube = distube;
 
 require('./handlers/modalHandler')(client);
 
@@ -134,13 +118,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 ? await interaction.followUp(reply)
                 : await interaction.reply(reply);
         }
-    }
-});
-
-client.on(Events.MessageCreate, async (message) => {
-    if (message.author.bot) return;
-    if (/aladeen/i.test(message.content)) {
-        await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
     }
 });
 

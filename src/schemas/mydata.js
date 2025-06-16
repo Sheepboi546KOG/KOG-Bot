@@ -17,6 +17,10 @@ const myDataSchema = new mongoose.Schema({
     merits: {
         type: Number,
         default: 0
+    },
+    TrainingsAttended: {
+        type: Number,
+        default: 0
     }
 });
 

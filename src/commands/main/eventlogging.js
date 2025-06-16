@@ -216,11 +216,21 @@ module.exports = {
                             for (const userId of attendees) {
                                 const existingData = await MyData.findOne({ userId });
 
+                       
                                 if (existingData) {
                                     await MyData.updateOne({ userId }, { $inc: { eventsAttended: 1 } });
                                 } else {
                                     const newData = new MyData({ userId, eventsAttended: 1 });
                                     await newData.save();
+                                }
+
+                                if (eventType === "Training") {
+                                    if (existingData) {
+                                        await MyData.updateOne({ userId }, { $inc: { TrainingsAttended: 1 } });
+                                    } else {
+                             
+                                        await MyData.updateOne({ userId }, { $set: { TrainingsAttended: 1 } });
+                                    }
                                 }
                             }
 
@@ -228,13 +238,25 @@ module.exports = {
                             const hostData = await MyData.findOne({ userId: hostId });
 
                             if (hostData) {
-                                await MyData.updateOne({ userId: hostId }, { $inc: { eventsHosted: 1 } });
+                                await MyData.updateOne(
+                                    { userId: hostId },
+                                    { 
+                                        $inc: { 
+                                            eventsHosted: 1,
+                                            ...(eventType === "Training" && { TrainingsAttended: 1 })
+                                        }
+                                    }
+                                );
                             } else {
-                                const newHostData = new MyData({ userId: hostId, eventsHosted: 1 });
+                            
+                                const newHostData = new MyData({ 
+                                    userId: hostId, 
+                                    eventsHosted: 1, 
+                                    eventsAttended: 0,
+                                    ...(eventType === "Training" && { TrainingsAttended: 1 })
+                                });
                                 await newHostData.save();
                             }
-
-                           
 
                             for (const userId of meritAttendees) {
                                 const existingData = await MyData.findOne({ userId });
