@@ -121,7 +121,31 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 });
 
+client.on(Events.MessageCreate, async (message) => {
+    if (message.author.bot) return;
 
+    if (message.content.toLowerCase().includes('tyler')) {
+        await message.reply('Bro that guy stinks so much')
+
+    if (message.content.toLowerCase().includes('aladeen')) {
+        await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
+        return;
+    }
+
+    if (message.mentions.users.has('845719138836021278')) {
+        await message.reply('https://cdn.discordapp.com/attachments/1313568200100679700/1381368850544857238/watermark.gif?ex=685126be&is=684fd53e&hm=c6e8acd6a967fec3e6c5366d8092700c48431365da8e60f9c21154f16864d08f&');
+        return;
+    }
+
+    if (
+        message.content.toLowerCase().includes('gay') ||
+        message.content.toLowerCase().includes('femboy') ||
+        message.content.toLowerCase().includes('furry')
+    ) {
+        await message.reply('<@1125601338768756756>');
+        return;
+    }
+})
 
 mongoose.connect(process.env.MONGO_URI, {})
 	.then(() => console.log('Connected to MongoDB successfully.'))
