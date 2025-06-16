@@ -125,7 +125,8 @@ client.on(Events.MessageCreate, async (message) => {
     if (message.author.bot) return;
 
     if (message.content.toLowerCase().includes('tyler')) {
-        await message.reply('Bro that guy stinks so much')
+        await message.reply('Bro that guy stinks so much');
+    }
 
     if (message.content.toLowerCase().includes('aladeen')) {
         await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
@@ -145,7 +146,7 @@ client.on(Events.MessageCreate, async (message) => {
         await message.reply('<@1125601338768756756>');
         return;
     }
-}})
+});
 
 mongoose.connect(process.env.MONGO_URI, {})
 	.then(() => console.log('Connected to MongoDB successfully.'))
