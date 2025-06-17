@@ -133,11 +133,6 @@ client.on(Events.MessageCreate, async (message) => {
         return;
     }
 
-    if (message.mentions.users.has('845719138836021278')) {
-        await message.reply('https://cdn.discordapp.com/attachments/1313568200100679700/1381368850544857238/watermark.gif?ex=685126be&is=684fd53e&hm=c6e8acd6a967fec3e6c5366d8092700c48431365da8e60f9c21154f16864d08f&');
-        return;
-    }
-
     if (
         message.content.toLowerCase().includes('gay') ||
         message.content.toLowerCase().includes('femboy') ||
