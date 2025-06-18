@@ -129,7 +129,9 @@ client.on(Events.MessageCreate, async (message) => {
     }
 
     if (message.content.toLowerCase().includes('aladeen')) {
-        await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
+        if (Math.random() < 0.1) {
+            await message.reply('https://th.bing.com/th/id/OIP.tTh2ZpKNJ-3HBpJKaW_5RwHaHa?rs=1&pid=ImgDetMain&cb=idpwebp1&o=7&rm=3');
+        }
         return;
     }
 
