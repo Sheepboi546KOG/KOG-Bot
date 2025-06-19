@@ -134,15 +134,6 @@ client.on(Events.MessageCreate, async (message) => {
         }
         return;
     }
-
-    if (
-        message.content.toLowerCase().includes('gay') ||
-        message.content.toLowerCase().includes('femboy') ||
-        message.content.toLowerCase().includes('furry')
-    ) {
-        await message.reply('<@1125601338768756756>');
-        return;
-    }
 });
 
 mongoose.connect(process.env.MONGO_URI, {})
