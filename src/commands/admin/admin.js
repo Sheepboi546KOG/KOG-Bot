@@ -79,7 +79,7 @@ module.exports = {
                 }
 
                 const adminList = admins.map(admin => `<@${admin.userId}>`).join('\n');
-                interaction.reply({ content: `Current admins:\n${adminList}` });
+                interaction.reply({ content: `Current admins:\n${adminList}`, ephemeral: true });
             }
         } catch (error) {
             console.error(error);

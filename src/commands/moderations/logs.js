@@ -1,6 +1,7 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const Warning = require("../../schemas/warn.js");
 const Ban = require("../../schemas/bans.js");
+ const modSchema = require("../../schemas/mods.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,17 +12,16 @@ module.exports = {
         ),
 
     async execute(interaction) {
-        const modSchema = require("../../schemas/mods.js");
-         const haspermission = await modSchema.findOne({ userId: interaction.user.id });
+        const modEntry = await modSchema.findOne({ userId: interaction.user.id });
         
-            if (!haspermission) {
-              const noPermissionEmbed = new EmbedBuilder()
+        if (!modEntry) {
+            const noPermissionEmbed = new EmbedBuilder()
                 .setColor("#e44144")
                 .setTitle("Permission Denied")
-                .setDescription("You do not have permission to use this command.")
+                .setDescription("You do not have permission to use this command.\nIf your are a KIAD agent, please contact Sheepboi546.")
                 .setTimestamp();
-              return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
-            }
+            return interaction.reply({ embeds: [noPermissionEmbed], ephemeral: true });
+        }
 
 
         const userToCheck = interaction.options.getUser("user");
