@@ -26,27 +26,30 @@ module.exports = {
 
         const userToCheck = interaction.options.getUser("user");
 
-        // Fetch logs
+   
         const warnings = await Warning.find({ userId: userToCheck.id, removed: false });
-        const bans = await Ban.find({ userId: userToCheck.id, active: true });
+        const bans = await Ban.find({ userId: userToCheck.id });
 
-        // Format logs
+
+       
         const logs = [
-            ...warnings.map(w => ({
-                type: "Warning",
-                id: w.warningId || "N/A",
-                reason: w.reason,
-                date: w.date,
-                image: w.image || null,
-            })),
-            ...bans.map(b => ({
-                type: "Ban",
-                id: "N/A",
-                reason: b.reason,
-                date: b.bannedAt,
-                image: null,
-            }))
-        ].sort((a, b) => new Date(b.date) - new Date(a.date));
+    ...warnings.map(w => ({
+        type: "Warning",
+        id: w.warningId || "N/A",
+        reason: w.reason,
+        date: w.date,
+        image: w.image || null,
+    })),
+    ...bans.map(b => ({
+        type: "Ban",
+        id: "N/A",
+        reason: b.reason,
+        date: b.bannedAt,
+        image: null,
+        active: b.active
+    }))
+].sort((a, b) => new Date(b.date) - new Date(a.date));
+
 
         if (logs.length === 0) {
             const noLogEmbed = new EmbedBuilder()
@@ -59,12 +62,13 @@ module.exports = {
         }
 
         const logList = logs.map(log => `
-**Type:** ${log.type}
+**Type:** ${log.type}${log.type === "Ban" && log.active === false ? " (Inactive)" : ""}
 ${log.id !== "N/A" ? `**Log ID:** \`${log.id}\`` : ""}
 **Reason:** ${log.reason}
 **Date Issued:** <t:${Math.floor(new Date(log.date).getTime() / 1000)}:F>
 ${log.image ? `**Evidence:** [View Image](${log.image})` : ""}`.trim()
-        ).join("\n────────────────────────\n");
+).join("\n────────────────────────\n");
+
 
         const logEmbed = new EmbedBuilder()
             .setColor("#2da4cc")

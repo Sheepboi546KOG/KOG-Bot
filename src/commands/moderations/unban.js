@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const axios = require("axios");
 require("dotenv").config();
 const adminSchema = require("../../schemas/admin");
+const banSchema = require("../../schemas/bans");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -84,6 +85,14 @@ module.exports = {
             .setTimestamp()],
           ephemeral: true
         });
+      }
+
+
+      if (unbanScope === "KOG" || unbanScope === "ALL") {
+        await banSchema.updateMany(
+          { userId, active: true },
+          { $set: { active: false } }
+        );
       }
 
       const logEmbed = new EmbedBuilder()
