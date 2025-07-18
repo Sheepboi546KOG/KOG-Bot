@@ -1,15 +1,16 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('Replies with Pong!'),
+    .setName("ping")
+    .setDescription("Replies with Pong!"),
 
   async execute(interaction) {
     const ping = Math.floor(interaction.client.ws.ping);
     let description;
     if (ping === -1) {
-      description = "Ping: Unavailable - The bot is still establishing a connection to Discord. Try again in a few seconds.";
+      description =
+        "Ping: Unavailable - The bot is still establishing a connection to Discord. Try again in a few seconds.";
     } else if (ping < 100) {
       description = `Ping: ${ping}ms - That's faster than the time it takes for a hummingbird to flap its wings once!`;
     } else if (ping < 200) {
@@ -23,11 +24,14 @@ module.exports = {
     }
 
     const embed = new EmbedBuilder()
-      .setTitle('🏓 Pong!')
+      .setTitle("🏓 Pong!")
       .setColor("Blue")
       .setDescription(description)
       .setTimestamp()
-      .setFooter({ text: 'KOG Bot', iconURL: interaction.client.user.displayAvatarURL() });
+      .setFooter({
+        text: "KOG Bot",
+        iconURL: interaction.client.user.displayAvatarURL(),
+      });
 
     await interaction.reply({ embeds: [embed] });
   },

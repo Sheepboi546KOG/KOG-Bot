@@ -17,7 +17,8 @@
   "scripts": {
     "start": "node src/deploy/registercommands.js && node src/index.js",
     "dev": "node src/deploy/registercommands.js && node src/index.js --dev",
-    "test": "echo \"No tests specified yet\" && exit 0"
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -28,5 +29,10 @@
   "bugs": {
     "url": "https://github.com/Sheepboi546KOG/KOG-Bot/issues"
   },
-  "homepage": "https://github.com/Sheepboi546KOG/KOG-Bot#readme"
+  "homepage": "https://github.com/Sheepboi546KOG/KOG-Bot#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0"
+  }
 }
