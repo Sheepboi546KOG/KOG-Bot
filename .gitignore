@@ -2,3 +2,5 @@
 node_modules
 .github
 examples
+blacklisted
+bcg.js
